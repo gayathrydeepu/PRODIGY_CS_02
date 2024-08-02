@@ -1,0 +1,48 @@
+from PIL import Image
+import os
+
+def encrypt_decrypt(image_path, key, mode):
+    """Encrypts or decrypts an image using pixel manipulation.
+
+    Args:
+        image_path: Path to the image file.
+        key: A secret integer key for encryption/decryption.
+        mode: 'encrypt' or 'decrypt' to specify the operation.
+    """
+    # Open image
+    img = Image.open(image_path)
+    pixels = img.load()
+    width, height = img.size
+
+    # Function to perform XOR on each pixel value with the key
+    def modify_pixel(pixel):
+        return tuple(channel ^ key for channel in pixel)
+
+    # Encryption/Decryption loop
+    for y in range(height):
+        for x in range(width):
+            pixel = pixels[x, y]
+            # Apply XOR with key based on mode
+            if mode == 'encrypt' or mode == 'decrypt':
+                new_pixel = modify_pixel(pixel)
+                pixels[x, y] = new_pixel
+            else:
+                raise ValueError("Mode must be 'encrypt' or 'decrypt'")
+
+    # Save modified image
+    base, ext = os.path.splitext(image_path)
+    new_path = f"{base}_{mode}.png"  # Add suffix based on mode
+    img.save(new_path)
+    print(f"{mode.title()}d image saved to: {new_path}")
+
+# Get user input
+image_path = input("Enter image path: ")
+key = int(input("Enter secret key (integer): "))
+mode = input("Enter 'encrypt' or 'decrypt': ").lower()
+
+# Check for valid mode
+if mode not in ('encrypt', 'decrypt'):
+    print("Invalid mode. Please enter 'encrypt' or 'decrypt'.")
+else:
+    # Perform encryption or decryption
+    encrypt_decrypt(image_path, key, mode)
